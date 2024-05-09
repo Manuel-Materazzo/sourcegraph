@@ -3142,8 +3142,8 @@ def go_dependencies():
         name = "com_github_hashicorp_golang_lru_v2",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/hashicorp/golang-lru/v2",
-        sum = "h1:Dwmkdr5Nc/oBiXgJS3CDHNhJtIHkuZ3DZF5twqnfBdU=",
-        version = "v2.0.2",
+        sum = "h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs4luLUK2k=",
+        version = "v2.0.7",
     )
     go_repository(
         name = "com_github_hashicorp_hcl",
@@ -3592,6 +3592,13 @@ def go_dependencies():
         importpath = "github.com/Joker/jade",
         sum = "h1:Qbeh12Vq6BxURXT1qZBRHsDxeURB8ztcL6f3EXSGeHk=",
         version = "v1.1.3",
+    )
+    go_repository(
+        name = "com_github_jomei_notionapi",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/jomei/notionapi",
+        sum = "h1:+7c32xWtKJEghIiaKgFg9yBpqh95pxxlqX/CWjqHpkw=",
+        version = "v1.13.0",
     )
     go_repository(
         name = "com_github_jonboulle_clockwork",
@@ -4180,6 +4187,13 @@ def go_dependencies():
         importpath = "github.com/matttproud/golang_protobuf_extensions/v2",
         sum = "h1:jWpvCLoY8Z/e3VKvlsiIGKtc+UG6U5vzxaoagmhXfyg=",
         version = "v2.0.0",
+    )
+    go_repository(
+        name = "com_github_maxbrunsfeld_counterfeiter_v6",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/maxbrunsfeld/counterfeiter/v6",
+        sum = "h1:NicmruxkeqHjDv03SfSxqmaLuisddudfP3h5wdXFbhM=",
+        version = "v6.8.1",
     )
     go_repository(
         name = "com_github_mazznoer_csscolorparser",
@@ -5234,6 +5248,13 @@ def go_dependencies():
         version = "v2.2.0",
     )
     go_repository(
+        name = "com_github_sclevine_spec",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/sclevine/spec",
+        sum = "h1:z/Q9idDcay5m5irkZ28M7PtQM4aOISzOpj4bUPkDee8=",
+        version = "v1.4.0",
+    )
+    go_repository(
         name = "com_github_sean_seed",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/sean-/seed",
@@ -5455,8 +5476,8 @@ def go_dependencies():
         name = "com_github_sourcegraph_cloud_api",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/sourcegraph/cloud-api",
-        sum = "h1:tgqkTr812ydrUTktrJGRD9BpIEt/Gv0/NsJiugr6qe0=",
-        version = "v0.0.0-20240423104735-5602ff6597cc",
+        sum = "h1:ZCHR0jxMJ0QhwHbHnbXuWTJrIeJT6uuJZ5D8V2Csg6g=",
+        version = "v0.0.0-20240501113836-ecd1d4cba9dd",
     )
     go_repository(
         name = "com_github_sourcegraph_conc",
@@ -5609,6 +5630,13 @@ def go_dependencies():
         version = "v0.0.0-20240201124957-b314c0befab1",
     )
     go_repository(
+        name = "com_github_sourcegraph_notionreposync",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/sourcegraph/notionreposync",
+        sum = "h1:+ghayvC6PL3/8g4tqRsQCYKeH296tkogGSzpov6Ae+M=",
+        version = "v0.0.0-20240502050143-447b6b9e6763",
+    )
+    go_repository(
         name = "com_github_sourcegraph_run",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/sourcegraph/run",
@@ -5648,8 +5676,8 @@ def go_dependencies():
         patches = [
             "//third_party/com_github_sourcegraph_zoekt:x_defs_version.patch",
         ],
-        sum = "h1:aXHLpH1rhdvg4gQOiQWLkqVd3D/DG2li5Nnf6WE7mRs=",
-        version = "v0.0.0-20240501072156-72f95004e6d6",
+        sum = "h1:eQIFTvf8qZcSLhgu5NrprfwgtJEqU9tvGXG8sf1SSgU=",
+        version = "v0.0.0-20240507175742-4e674a49795c",
     )
     go_repository(
         name = "com_github_spaolacci_murmur3",
@@ -5816,8 +5844,8 @@ def go_dependencies():
         name = "com_github_tidwall_pretty",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/tidwall/pretty",
-        sum = "h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=",
-        version = "v1.2.0",
+        sum = "h1:qjsOFOWWQl+N3RsoF5/ssm1pHmJJwhjlSbZ51I6wMl4=",
+        version = "v1.2.1",
     )
     go_repository(
         name = "com_github_titanous_rocacheck",
@@ -6183,8 +6211,8 @@ def go_dependencies():
         name = "com_github_yuin_goldmark",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/yuin/goldmark",
-        sum = "h1:boZcn2GTjpsynOsC0iJHnBWa4Bi0qzfJjthwauItG68=",
-        version = "v1.6.0",
+        sum = "h1:3bajkSilaCbjdKVsKdZjZCLBNPL9pYzrCakKaf4U49U=",
+        version = "v1.7.1",
     )
     go_repository(
         name = "com_github_yuin_goldmark_emoji",

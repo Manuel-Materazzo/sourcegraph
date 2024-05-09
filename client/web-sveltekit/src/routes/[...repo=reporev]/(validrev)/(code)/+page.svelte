@@ -1,5 +1,5 @@
 <script lang="ts">
-    // @sg RepoRoot
+    // @sg RepoRoot EnableRollout
     import { onMount } from 'svelte'
 
     import { sidebarOpen } from '$lib/repo/stores'
@@ -20,6 +20,10 @@
         SVELTE_LOGGER.logViewEvent(SVELTE_TELEMETRY_EVENTS.ViewRepositoryPage)
     })
 </script>
+
+<svelte:head>
+    <title>{data.displayRepoName} - Sourcegraph</title>
+</svelte:head>
 
 <h3 class="header">
     <div class="sidebar-button" class:hidden={$sidebarOpen}>

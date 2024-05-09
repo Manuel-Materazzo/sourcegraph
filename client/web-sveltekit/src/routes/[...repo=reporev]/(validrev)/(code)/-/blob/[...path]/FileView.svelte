@@ -32,9 +32,9 @@
     import OpenInCodeHostAction from './OpenInCodeHostAction.svelte'
     import { CodeViewMode, toCodeViewMode } from './util'
 
-    export let embedded: boolean
-    export let disableCodeIntel: boolean
     export let data: Extract<PageData, { type: 'FileView' }>
+    export let embedded: boolean = false
+    export let disableCodeIntel: boolean = false
 
     export function capture(): ScrollSnapshot | null {
         return cmblob?.getScrollSnapshot() ?? null
@@ -294,7 +294,11 @@
         gap: 1rem;
         padding: 0.5rem;
         color: var(--text-muted);
-        background-color: var(--code-bg);
+        background-color: var(--color-bg-1);
+        box-shadow: var(--fileheader-shadow);
+
+        // Allows for its shadow to cascade over the code panel
+        z-index: 1;
     }
 
     .revision-info {

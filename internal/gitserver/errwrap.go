@@ -324,4 +324,27 @@ func (r *errorTranslatingClient) FirstEverCommit(ctx context.Context, in *proto.
 	return res, convertGRPCErrorToGitDomainError(err)
 }
 
+func (r *errorTranslatingClient) BehindAhead(ctx context.Context, in *proto.BehindAheadRequest, opts ...grpc.CallOption) (*proto.BehindAheadResponse, error) {
+	res, err := r.base.BehindAhead(ctx, in, opts...)
+	return res, convertGRPCErrorToGitDomainError(err)
+}
+
+type errorTranslatingChangedFilesClient struct {
+	proto.GitserverService_ChangedFilesClient
+}
+
+func (r *errorTranslatingChangedFilesClient) Recv() (*proto.ChangedFilesResponse, error) {
+	res, err := r.GitserverService_ChangedFilesClient.Recv()
+	return res, convertGRPCErrorToGitDomainError(err)
+}
+
+// ChangedFiles implements v1.GitserverServiceClient.
+func (r *errorTranslatingClient) ChangedFiles(ctx context.Context, in *proto.ChangedFilesRequest, opts ...grpc.CallOption) (proto.GitserverService_ChangedFilesClient, error) {
+	cc, err := r.base.ChangedFiles(ctx, in, opts...)
+	if err != nil {
+		return nil, convertGRPCErrorToGitDomainError(err)
+	}
+	return &errorTranslatingChangedFilesClient{cc}, nil
+}
+
 var _ proto.GitserverServiceClient = &errorTranslatingClient{}

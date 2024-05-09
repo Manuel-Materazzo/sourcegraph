@@ -183,6 +183,8 @@ const (
 	GitserverService_RawDiff_FullMethodName                     = "/gitserver.v1.GitserverService/RawDiff"
 	GitserverService_ContributorCounts_FullMethodName           = "/gitserver.v1.GitserverService/ContributorCounts"
 	GitserverService_FirstEverCommit_FullMethodName             = "/gitserver.v1.GitserverService/FirstEverCommit"
+	GitserverService_BehindAhead_FullMethodName                 = "/gitserver.v1.GitserverService/BehindAhead"
+	GitserverService_ChangedFiles_FullMethodName                = "/gitserver.v1.GitserverService/ChangedFiles"
 )
 
 // GitserverServiceClient is the client API for GitserverService service.
@@ -317,6 +319,39 @@ type GitserverServiceClient interface {
 	// If the given repository is empty, an error with a RevisionNotFoundPayload is
 	// returned.
 	FirstEverCommit(ctx context.Context, in *FirstEverCommitRequest, opts ...grpc.CallOption) (*FirstEverCommitResponse, error)
+	// BehindAhead returns the behind/ahead commit counts information for the symmetric difference left...right (both Git
+	// revspecs).
+	//
+	// Behind is the number of commits that are solely reachable in "left" but not "right".
+	// Ahead is the number of commits that are solely reachable in "right" but not "left".
+	//
+	//	 For the example, given the graph below, BehindAhead("A", "B") would return {Behind: 3, Ahead: 2}.
+	//
+	//		     y---b---b  branch B
+	//		    / \ /
+	//		   /   .
+	//		  /   / \
+	//		 o---x---a---a---a  branch A
+	//
+	// If either left or right are the empty string (""), the HEAD commit is implicitly used.
+	//
+	// If one of the two given revspecs does not exist, an error with a RevisionNotFoundPayload is
+	// is returned.
+	//
+	// If the given repo is not cloned, it will be enqueued for cloning and a
+	// NotFound error will be returned, with a RepoNotFoundPayload in the details.
+	BehindAhead(ctx context.Context, in *BehindAheadRequest, opts ...grpc.CallOption) (*BehindAheadResponse, error)
+	// ChangedFiles returns the list of files that have been added, modified, or
+	// deleted in the entire repository between the two given <tree-ish> identifiers (e.g., commit, branch, tag).
+	//
+	// - Renamed files are represented as a deletion of the old path and an addition of the new path.
+	// - No copy detection is performed.
+	// - The only file status codes returned are 'A' (added), 'M' (modified), or 'D' (deleted).
+	//
+	// If `base` is omitted, the parent of `head` is used as the base.
+	//
+	// If either the `base` or `head` <tree-ish> id does not exist, an error with a `RevisionNotFoundPayload` is returned.
+	ChangedFiles(ctx context.Context, in *ChangedFilesRequest, opts ...grpc.CallOption) (GitserverService_ChangedFilesClient, error)
 }
 
 type gitserverServiceClient struct {
@@ -765,6 +800,47 @@ func (c *gitserverServiceClient) FirstEverCommit(ctx context.Context, in *FirstE
 	return out, nil
 }
 
+func (c *gitserverServiceClient) BehindAhead(ctx context.Context, in *BehindAheadRequest, opts ...grpc.CallOption) (*BehindAheadResponse, error) {
+	out := new(BehindAheadResponse)
+	err := c.cc.Invoke(ctx, GitserverService_BehindAhead_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gitserverServiceClient) ChangedFiles(ctx context.Context, in *ChangedFilesRequest, opts ...grpc.CallOption) (GitserverService_ChangedFilesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GitserverService_ServiceDesc.Streams[8], GitserverService_ChangedFiles_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gitserverServiceChangedFilesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GitserverService_ChangedFilesClient interface {
+	Recv() (*ChangedFilesResponse, error)
+	grpc.ClientStream
+}
+
+type gitserverServiceChangedFilesClient struct {
+	grpc.ClientStream
+}
+
+func (x *gitserverServiceChangedFilesClient) Recv() (*ChangedFilesResponse, error) {
+	m := new(ChangedFilesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GitserverServiceServer is the server API for GitserverService service.
 // All implementations must embed UnimplementedGitserverServiceServer
 // for forward compatibility
@@ -897,6 +973,39 @@ type GitserverServiceServer interface {
 	// If the given repository is empty, an error with a RevisionNotFoundPayload is
 	// returned.
 	FirstEverCommit(context.Context, *FirstEverCommitRequest) (*FirstEverCommitResponse, error)
+	// BehindAhead returns the behind/ahead commit counts information for the symmetric difference left...right (both Git
+	// revspecs).
+	//
+	// Behind is the number of commits that are solely reachable in "left" but not "right".
+	// Ahead is the number of commits that are solely reachable in "right" but not "left".
+	//
+	//	 For the example, given the graph below, BehindAhead("A", "B") would return {Behind: 3, Ahead: 2}.
+	//
+	//		     y---b---b  branch B
+	//		    / \ /
+	//		   /   .
+	//		  /   / \
+	//		 o---x---a---a---a  branch A
+	//
+	// If either left or right are the empty string (""), the HEAD commit is implicitly used.
+	//
+	// If one of the two given revspecs does not exist, an error with a RevisionNotFoundPayload is
+	// is returned.
+	//
+	// If the given repo is not cloned, it will be enqueued for cloning and a
+	// NotFound error will be returned, with a RepoNotFoundPayload in the details.
+	BehindAhead(context.Context, *BehindAheadRequest) (*BehindAheadResponse, error)
+	// ChangedFiles returns the list of files that have been added, modified, or
+	// deleted in the entire repository between the two given <tree-ish> identifiers (e.g., commit, branch, tag).
+	//
+	// - Renamed files are represented as a deletion of the old path and an addition of the new path.
+	// - No copy detection is performed.
+	// - The only file status codes returned are 'A' (added), 'M' (modified), or 'D' (deleted).
+	//
+	// If `base` is omitted, the parent of `head` is used as the base.
+	//
+	// If either the `base` or `head` <tree-ish> id does not exist, an error with a `RevisionNotFoundPayload` is returned.
+	ChangedFiles(*ChangedFilesRequest, GitserverService_ChangedFilesServer) error
 	mustEmbedUnimplementedGitserverServiceServer()
 }
 
@@ -987,6 +1096,12 @@ func (UnimplementedGitserverServiceServer) ContributorCounts(context.Context, *C
 }
 func (UnimplementedGitserverServiceServer) FirstEverCommit(context.Context, *FirstEverCommitRequest) (*FirstEverCommitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FirstEverCommit not implemented")
+}
+func (UnimplementedGitserverServiceServer) BehindAhead(context.Context, *BehindAheadRequest) (*BehindAheadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BehindAhead not implemented")
+}
+func (UnimplementedGitserverServiceServer) ChangedFiles(*ChangedFilesRequest, GitserverService_ChangedFilesServer) error {
+	return status.Errorf(codes.Unimplemented, "method ChangedFiles not implemented")
 }
 func (UnimplementedGitserverServiceServer) mustEmbedUnimplementedGitserverServiceServer() {}
 
@@ -1534,6 +1649,45 @@ func _GitserverService_FirstEverCommit_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GitserverService_BehindAhead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BehindAheadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GitserverServiceServer).BehindAhead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GitserverService_BehindAhead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GitserverServiceServer).BehindAhead(ctx, req.(*BehindAheadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GitserverService_ChangedFiles_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ChangedFilesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GitserverServiceServer).ChangedFiles(m, &gitserverServiceChangedFilesServer{stream})
+}
+
+type GitserverService_ChangedFilesServer interface {
+	Send(*ChangedFilesResponse) error
+	grpc.ServerStream
+}
+
+type gitserverServiceChangedFilesServer struct {
+	grpc.ServerStream
+}
+
+func (x *gitserverServiceChangedFilesServer) Send(m *ChangedFilesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // GitserverService_ServiceDesc is the grpc.ServiceDesc for GitserverService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1621,6 +1775,10 @@ var GitserverService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "FirstEverCommit",
 			Handler:    _GitserverService_FirstEverCommit_Handler,
 		},
+		{
+			MethodName: "BehindAhead",
+			Handler:    _GitserverService_BehindAhead_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -1661,6 +1819,11 @@ var GitserverService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "RawDiff",
 			Handler:       _GitserverService_RawDiff_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ChangedFiles",
+			Handler:       _GitserverService_ChangedFiles_Handler,
 			ServerStreams: true,
 		},
 	},

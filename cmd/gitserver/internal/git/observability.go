@@ -39,6 +39,16 @@ type observableBackend struct {
 	backend    GitBackend
 }
 
+func (b *observableBackend) BehindAhead(ctx context.Context, left, right string) (*gitdomain.BehindAhead, error) {
+	ctx, _, endObservation := b.operations.getBehindAhead.With(ctx, nil, observation.Args{})
+	defer endObservation(1, observation.Args{})
+
+	concurrentOps.WithLabelValues("BehindAhead").Inc()
+	defer concurrentOps.WithLabelValues("BehindAhead").Dec()
+
+	return b.backend.BehindAhead(ctx, left, right)
+}
+
 func (b *observableBackend) Config() GitConfigBackend {
 	return &observableGitConfigBackend{
 		backend:    b.backend.Config(),
@@ -379,6 +389,16 @@ func (b *observableBackend) FirstEverCommit(ctx context.Context) (_ api.CommitID
 	return b.backend.FirstEverCommit(ctx)
 }
 
+func (b *observableBackend) ChangedFiles(ctx context.Context, base, head string) (ChangedFilesIterator, error) {
+	ctx, _, endObservation := b.operations.changedFiles.With(ctx, nil, observation.Args{})
+	defer endObservation(1, observation.Args{})
+
+	concurrentOps.WithLabelValues("ChangedFiles").Inc()
+	defer concurrentOps.WithLabelValues("ChangedFiles").Dec()
+
+	return b.backend.ChangedFiles(ctx, base, head)
+}
+
 type operations struct {
 	configGet         *observation.Operation
 	configSet         *observation.Operation
@@ -398,6 +418,8 @@ type operations struct {
 	rawDiff           *observation.Operation
 	contributorCounts *observation.Operation
 	firstEverCommit   *observation.Operation
+	getBehindAhead    *observation.Operation
+	changedFiles      *observation.Operation
 }
 
 func newOperations(observationCtx *observation.Context) *operations {
@@ -444,6 +466,8 @@ func newOperations(observationCtx *observation.Context) *operations {
 		rawDiff:           op("raw-diff"),
 		contributorCounts: op("contributor-counts"),
 		firstEverCommit:   op("first-ever-commit"),
+		getBehindAhead:    op("get-behind-ahead"),
+		changedFiles:      op("changed-files"),
 	}
 }
 

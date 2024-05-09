@@ -246,7 +246,7 @@ func (g *SubprocessGit) RevList(ctx context.Context, repo string, commit string,
 	for {
 		var commits []api.CommitID
 		var err error
-		commits, nextCursor, err = g.gs.RevList(ctx, api.RepoName(repo), nextCursor, 100)
+		commits, nextCursor, err = g.paginatedRevList(ctx, api.RepoName(repo), nextCursor, 100)
 		if err != nil {
 			return err
 		}
@@ -263,6 +263,30 @@ func (g *SubprocessGit) RevList(ctx context.Context, repo string, commit string,
 			return nil
 		}
 	}
+}
+
+func (g *SubprocessGit) paginatedRevList(ctx context.Context, repo api.RepoName, commit string, count int) (_ []api.CommitID, nextCursor string, _ error) {
+	commits, err := g.gs.Commits(ctx, repo, gitserver.CommitsOptions{
+		N:           uint(count + 1),
+		Range:       commit,
+		FirstParent: true,
+	})
+	if err != nil {
+		return nil, "", err
+	}
+
+	commitIDs := make([]api.CommitID, 0, count+1)
+
+	for _, commit := range commits {
+		commitIDs = append(commitIDs, commit.ID)
+	}
+
+	if len(commitIDs) > count {
+		nextCursor = string(commitIDs[len(commitIDs)-1])
+		commitIDs = commitIDs[:count]
+	}
+
+	return commitIDs, nextCursor, nil
 }
 
 func newMockRepositoryFetcher(git *SubprocessGit) fetcher.RepositoryFetcher {
@@ -341,4 +365,100 @@ func (f *mockRepositoryFetcher) FetchRepositoryArchive(ctx context.Context, repo
 	}()
 
 	return ch
+}
+
+func TestRuler(t *testing.T) {
+	testCases := []struct {
+		n    int
+		want int
+	}{
+		{0, 0},
+		{1, 0},
+		{2, 1},
+		{3, 0},
+		{4, 2},
+		{5, 0},
+		{6, 1},
+		{7, 0},
+		{8, 3},
+		{64, 6},
+		{96, 5},
+		{123, 0},
+	}
+
+	for _, tc := range testCases {
+		got := ruler(tc.n)
+		if got != tc.want {
+			t.Errorf("ruler(%d): got %d, want %d", tc.n, got, tc.want)
+		}
+	}
+}
+
+func TestGetHops(t *testing.T) {
+	ctx := context.Background()
+	repoId := 42
+
+	db := dbtest.NewDB(t)
+	defer db.Close()
+
+	// Insert some initial commits.
+	commit0, err := InsertCommit(ctx, db, repoId, "0000", 0, NULL)
+	require.NoError(t, err)
+
+	commit1, err := InsertCommit(ctx, db, repoId, "1111", 0, commit0)
+	require.NoError(t, err)
+
+	commit2, err := InsertCommit(ctx, db, repoId, "2222", 1, commit0)
+	require.NoError(t, err)
+
+	commit3, err := InsertCommit(ctx, db, repoId, "3333", 0, commit2)
+	require.NoError(t, err)
+
+	commit4, err := InsertCommit(ctx, db, repoId, "4444", 2, NULL)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name   string
+		commit CommitId
+		want   []int
+	}{
+		{
+			name:   "commit0",
+			commit: commit0,
+			want:   []CommitId{commit0, NULL},
+		},
+		{
+			name:   "commit1",
+			commit: commit1,
+			want:   []CommitId{commit1, commit0, NULL},
+		},
+		{
+			name:   "commit2",
+			commit: commit2,
+			want:   []CommitId{commit2, commit0, NULL},
+		},
+		{
+			name:   "commit3",
+			commit: commit3,
+			want:   []CommitId{commit3, commit2, commit0, NULL},
+		},
+		{
+			name:   "commit4",
+			commit: commit4,
+			want:   []CommitId{commit4, NULL},
+		},
+		{
+			name:   "nonexistent",
+			commit: 42,
+			want:   []CommitId{42},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getHops(ctx, db, tt.commit, NewTaskLog())
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
+	}
 }
