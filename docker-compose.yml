@@ -53,68 +53,6 @@ services:
       codeintel-db:
         condition: service_healthy
 
-  # Description: Serves the frontend of Sourcegraph via HTTP(S).
-  #
-  # Disk: 128GB / non-persistent SSD
-  # Ports exposed to other Sourcegraph services: 6060/TCP, 3080 (HTTP), and/or 3443 (HTTPS)
-  # Ports exposed to the public internet: none
-  #
-  # Note: SRC_GIT_SERVERS, SEARCHER_URL, and SYMBOLS_URL are space-separated
-  # lists which each allow you to specify more container instances for scaling
-  # purposes. Be sure to also apply such a change here to the frontend-internal
-  # service.
-  sourcegraph-frontend-0:
-    container_name: sourcegraph-frontend-0
-    # image: 'index.docker.io/sourcegraph/frontend:272711_2024-05-06_5.3-d1983a8ca1b8'
-    build:
-      dockerfile: /cmd/frontend/Dockerfile
-      context: '.'
-    environment:
-      - DEPLOY_TYPE=docker-compose
-      - PGHOST=pgsql
-      - CODEINTEL_PGHOST=codeintel-db
-      - CODEINSIGHTS_PGDATASOURCE=postgres://postgres:password@codeinsights-db:5432/postgres
-      - 'SRC_GIT_SERVERS=gitserver-0:3178'
-      - 'SRC_SYNTECT_SERVER=http://syntect-server:9238'
-      - 'SEARCHER_URL=http://searcher-0:3181'
-      - 'SYMBOLS_URL=http://symbols-0:3184'
-      - 'INDEXED_SEARCH_SERVERS=zoekt-webserver-0:6070'
-      - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
-      - 'REPO_UPDATER_URL=http://repo-updater:3182'
-      - 'GRAFANA_SERVER_URL=http://grafana:3370'
-      - 'PROMETHEUS_URL=http://prometheus:9090'
-      - 'PRECISE_CODE_INTEL_UPLOAD_BACKEND=blobstore'
-      - 'PRECISE_CODE_INTEL_UPLOAD_AWS_ENDPOINT=http://blobstore:9000'
-      - |
-        SRC_PROF_SERVICES=
-          [
-            { "Name": "frontend-0", "Host": "sourcegraph-frontend-0:6060" },
-            { "Name": "frontend-internal-0", "Host": "sourcegraph-frontend-internal:6060" },
-            { "Name": "gitserver-0", "Host": "gitserver-0:6060" },
-            { "Name": "searcher-0", "Host": "searcher-0:6060" },
-            { "Name": "symbols-0", "Host": "symbols-0:6060" },
-            { "Name": "repo-updater", "Host": "repo-updater:6060" },
-            { "Name": "worker", "Host": "worker:6060" },
-            { "Name": "zoekt-indexserver-0", "Host": "zoekt-indexserver-0:6072" },
-            { "Name": "zoekt-webserver-0", "Host": "zoekt-webserver-0:6070", "DefaultPath": "/debug/requests/" }
-          ]
-    ports:
-      - '0.0.0.0:3080:3080'
-    healthcheck:
-      test: "wget -q 'http://127.0.0.1:3080/healthz' -O /dev/null || exit 1"
-      interval: 10s
-      timeout: 10s
-      retries: 10
-      start_period: 300s
-    volumes:
-      - 'sourcegraph-frontend-0:/mnt/cache'
-    networks:
-      - sourcegraph
-    restart: always
-    depends_on:
-      sourcegraph-frontend-internal:
-        condition: service_healthy
-
   # Description: Serves the internal Sourcegraph frontend API.
   #
   # Disk: 128GB / non-persistent SSD
@@ -139,15 +77,29 @@ services:
       - 'INDEXED_SEARCH_SERVERS=zoekt-webserver-0:6070'
       - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
       - 'REPO_UPDATER_URL=http://repo-updater:3182'
-      - 'GRAFANA_SERVER_URL=http://grafana:3000'
       - 'PROMETHEUS_URL=http://prometheus:9090'
       - 'PRECISE_CODE_INTEL_UPLOAD_BACKEND=blobstore'
       - 'PRECISE_CODE_INTEL_UPLOAD_AWS_ENDPOINT=http://blobstore:9000'
+      - |
+        SRC_PROF_SERVICES=
+          [
+            { "Name": "frontend-0", "Host": "sourcegraph-frontend-0:6060" },
+            { "Name": "frontend-internal-0", "Host": "sourcegraph-frontend-internal:6060" },
+            { "Name": "gitserver-0", "Host": "gitserver-0:6060" },
+            { "Name": "searcher-0", "Host": "searcher-0:6060" },
+            { "Name": "symbols-0", "Host": "symbols-0:6060" },
+            { "Name": "repo-updater", "Host": "repo-updater:6060" },
+            { "Name": "worker", "Host": "worker:6060" },
+            { "Name": "zoekt-indexserver-0", "Host": "zoekt-indexserver-0:6072" },
+            { "Name": "zoekt-webserver-0", "Host": "zoekt-webserver-0:6070", "DefaultPath": "/debug/requests/" }
+          ]
     volumes:
       - 'sourcegraph-frontend-internal-0:/mnt/cache'
     networks:
       - sourcegraph
     restart: always
+    ports:
+      - '0.0.0.0:3080:3080'
     healthcheck:
       test: "wget -q 'http://127.0.0.1:3080/healthz' -O /dev/null || exit 1"
       interval: 5s
@@ -524,10 +476,6 @@ services:
   gpt4free:
     container_name: gpt4free
     image: hlohaus789/g4f:0.3.0.8
-    ports:
-      - 1337:1337
-      - 7900:7900
-      - 8080:8080
     volumes:
       - 'gpt4free-cookies:/app/har_and_cookies'
     networks:
@@ -536,7 +484,6 @@ services:
 volumes:
   gpt4free-cookies:
   gitserver-0:
-  grafana:
   pgsql:
   codeintel-db:
   codeinsights-db:
@@ -546,7 +493,6 @@ volumes:
   repo-updater:
   worker:
   searcher-0:
-  sourcegraph-frontend-0:
   sourcegraph-frontend-internal-0:
   symbols-0:
   zoekt-0-shared:
