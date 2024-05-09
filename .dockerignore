@@ -77,8 +77,8 @@ cmd/indexer/debug
 /.gtm/
 
 # Web
-node_modules/
-/client/web
+#node_modules/
+#/client/web
 
 # Browser
 /client/browser/build
