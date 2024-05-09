@@ -71,7 +71,8 @@ export const basicSyntaxColumns = (
                   {
                       title: 'Advanced',
                       queryExamples: [
-                          { query: 'repo:has.description(foo)' },
+                          { query: 'repo:@*refs/heads/*', helperText: '(search on all repos, on all branches)' },
+						  { query: 'repo:has.description(foo)' },
                           { query: 'file:^some_path file:has.owner(alice)' },
                           { query: 'file:^some_path select:file.owners' },
                           { query: 'file:has.commit.after(1week)' },
