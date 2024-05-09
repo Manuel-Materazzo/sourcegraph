@@ -9,6 +9,7 @@ import (
 	"github.com/sourcegraph/sourcegraph/internal/completions/client/codygateway"
 	"github.com/sourcegraph/sourcegraph/internal/completions/client/fireworks"
 	"github.com/sourcegraph/sourcegraph/internal/completions/client/openai"
+	"github.com/sourcegraph/sourcegraph/internal/completions/client/gpt4free"
 	"github.com/sourcegraph/sourcegraph/internal/completions/tokenusage"
 	"github.com/sourcegraph/sourcegraph/internal/completions/types"
 	"github.com/sourcegraph/sourcegraph/internal/conf/conftypes"
@@ -34,6 +35,8 @@ func Get(
 func getBasic(endpoint string, provider conftypes.CompletionsProviderName, accessToken string) (types.CompletionsClient, error) {
 	tokenManager := tokenusage.NewManager()
 	switch provider {
+	case conftypes.CompletionsProviderNameGpt4Free:
+		return gpt4free.NewClient(httpcli.UncachedExternalDoer, endpoint, accessToken, *tokenManager), nil
 	case conftypes.CompletionsProviderNameAnthropic:
 		return anthropic.NewClient(httpcli.UncachedExternalDoer, endpoint, accessToken, false, *tokenManager), nil
 	case conftypes.CompletionsProviderNameOpenAI:

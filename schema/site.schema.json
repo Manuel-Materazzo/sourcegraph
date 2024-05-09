@@ -2682,7 +2682,7 @@
         "provider": {
           "type": "string",
           "description": "The provider to use for generating embeddings. Defaults to sourcegraph.",
-          "enum": ["openai", "azure-openai", "sourcegraph"]
+          "enum": ["openai", "gpt4free", "azure-openai", "sourcegraph"]
         },
         "endpoint": {
           "type": "string",
@@ -2873,7 +2873,7 @@
           "type": "string",
           "description": "The external completions provider. Defaults to 'sourcegraph'.",
           "default": "sourcegraph",
-          "enum": ["anthropic", "openai", "sourcegraph", "azure-openai", "aws-bedrock", "fireworks"]
+          "enum": ["anthropic", "gpt4free", "openai", "sourcegraph", "azure-openai", "aws-bedrock", "fireworks"]
         },
         "endpoint": {
           "type": "string",

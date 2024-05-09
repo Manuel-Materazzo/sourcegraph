@@ -38,6 +38,7 @@ type CompletionsProviderName string
 const (
 	CompletionsProviderNameAnthropic   CompletionsProviderName = "anthropic"
 	CompletionsProviderNameOpenAI      CompletionsProviderName = "openai"
+	CompletionsProviderNameGpt4Free      CompletionsProviderName = "gpt4free"
 	CompletionsProviderNameAzureOpenAI CompletionsProviderName = "azure-openai"
 	CompletionsProviderNameSourcegraph CompletionsProviderName = "sourcegraph"
 	CompletionsProviderNameFireworks   CompletionsProviderName = "fireworks"

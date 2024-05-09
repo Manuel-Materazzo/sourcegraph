@@ -804,6 +804,26 @@ func GetCompletionsConfig(siteConfig schema.SiteConfiguration) (c *conftypes.Com
 		if completionsConfig.CompletionModel == "" {
 			return nil
 		}
+	} else if completionsConfig.Provider == string(conftypes.CompletionsProviderNameGpt4Free) {
+		// If no endpoint is configured, use a default value.
+		if completionsConfig.Endpoint == "" {
+			completionsConfig.Endpoint = "http://gpt4free:1337/v1/completions"
+		}
+
+		// If not chat model is set, use a default value.
+		if completionsConfig.ChatModel == "" {
+			completionsConfig.ChatModel = "gpt-4"
+		}
+
+		// If not fast chat model is set, we fall back to the Chat Model.
+		if completionsConfig.FastChatModel == "" {
+			completionsConfig.FastChatModel = completionsConfig.ChatModel
+		}
+
+		// If not completions model is set, we fall back to the Chat Model.
+		if completionsConfig.CompletionModel == "" {
+			completionsConfig.CompletionModel = completionsConfig.ChatModel
+		}
 	} else if completionsConfig.Provider == string(conftypes.CompletionsProviderNameFireworks) {
 		// If no endpoint is configured, use a default value.
 		if completionsConfig.Endpoint == "" {

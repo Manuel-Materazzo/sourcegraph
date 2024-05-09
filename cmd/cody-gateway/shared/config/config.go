@@ -41,6 +41,8 @@ type Config struct {
 
 	OpenAI OpenAIConfig
 
+	Gpt4Free Gpt4FreeConfig
+
 	Fireworks FireworksConfig
 
 	AllowedEmbeddingsModels []string
@@ -97,6 +99,13 @@ type FireworksConfig struct {
 }
 
 type OpenAIConfig struct {
+	AllowedModels  []string
+	AccessToken    string
+	OrgID          string
+	FlaggingConfig FlaggingConfig
+}
+
+type Gpt4FreeConfig struct {
 	AllowedModels  []string
 	AccessToken    string
 	OrgID          string
@@ -212,6 +221,17 @@ func (c *Config) Load() {
 	if c.OpenAI.AccessToken != "" && len(c.OpenAI.AllowedModels) == 0 {
 		c.AddError(errors.New("must provide allowed models for OpenAI"))
 	}
+
+	c.Gpt4Free.AccessToken = c.GetOptional("CODY_GATEWAY_OPENAI_ACCESS_TOKEN", "The OpenAI access token to be used.")
+	c.Gpt4Free.OrgID = c.GetOptional("CODY_GATEWAY_OPENAI_ORG_ID", "The OpenAI organization to count billing towards. Setting this ensures we always use the correct negotiated terms.")
+	c.Gpt4Free.AllowedModels = splitMaybe(c.Get("CODY_GATEWAY_OPENAI_ALLOWED_MODELS",
+		strings.Join([]string{"gpt-4", "gpt-3.5-turbo", "gpt-4-turbo", "gpt-4-turbo-preview"}, ","),
+		"OpenAI models that can to be used."),
+	)
+	if c.Gpt4Free.AccessToken != "" && len(c.OpenAI.AllowedModels) == 0 {
+		c.AddError(errors.New("must provide allowed models for OpenAI"))
+	}
+
 
 	// Load configuration settings specific to how we flag OpenAI requests.
 	//
