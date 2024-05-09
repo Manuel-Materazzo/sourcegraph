@@ -19,8 +19,16 @@ RUN wget http://cdist2.perforce.com/perforce/r22.2/bin.linux26x86_64/p4 -O /usr/
     echo "/usr/local/bin/p4: OK"
 
 FROM sourcegraph/alpine-3.14:213466_2023-04-17_5.0-bdda34a71619@sha256:6354a4ff578b685e36c8fbde81f62125ae0011b047fb2cc22d1b0de616b3c59a AS coursier
+ARG ARCH
 
-RUN wget -O coursier.gz https://github.com/coursier/coursier/releases/download/v2.1.0-RC4/cs-x86_64-pc-linux-static.gz && \
+RUN export ARCH=$(uname -m) && if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then \
+      wget -O coursier.gz https://github.com/coursier/coursier/releases/download/v2.1.0-RC4/cs-aarch64-pc-linux.gz; \
+    elif [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then \
+      wget -O coursier.gz https://github.com/coursier/coursier/releases/download/v2.1.0-RC4/cs-x86_64-pc-linux-static.gz; \
+    else \
+      echo "Unsupported architecture: $ARCH"; \
+      exit 1; \
+    fi && \
     gzip -d coursier.gz && \
     mv coursier /usr/local/bin/coursier && \
     chmod +x /usr/local/bin/coursier
