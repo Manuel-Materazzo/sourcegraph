@@ -15,7 +15,7 @@ services:
     container_name: migrator
     image: 'index.docker.io/sourcegraph/migrator:272711_2024-05-06_5.3-d1983a8ca1b8'
     # build:
-      # dockerfile: /cmd/migrator/Dockerfile
+      # dockerfile: cmd/migrator/Dockerfile
       # context: '.'
     command: ['up']
     environment:
@@ -63,7 +63,7 @@ services:
     container_name: sourcegraph-frontend-internal
     # image: 'index.docker.io/sourcegraph/frontend:272711_2024-05-06_5.3-d1983a8ca1b8'
     build:
-      dockerfile: /cmd/frontend/Dockerfile
+      dockerfile: cmd/frontend/Dockerfile
       context: '.'
     environment:
       - DEPLOY_TYPE=docker-compose
@@ -124,7 +124,7 @@ services:
     container_name: gitserver-0
     image: 'index.docker.io/sourcegraph/gitserver:272711_2024-05-06_5.3-d1983a8ca1b8'
     # build:
-      # dockerfile: /cmd/gitserver/Dockerfile
+      # dockerfile: cmd/gitserver/Dockerfile
       # context: '.'
     environment:
       - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
@@ -197,7 +197,7 @@ services:
     container_name: searcher-0
     image: 'index.docker.io/sourcegraph/searcher:272711_2024-05-06_5.3-d1983a8ca1b8'
     # build:
-      # dockerfile: /cmd/searcher/Dockerfile
+      # dockerfile: cmd/searcher/Dockerfile
       # context: '.'
     environment:
       - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
@@ -221,7 +221,7 @@ services:
     container_name: precise-code-intel-worker
     image: 'index.docker.io/sourcegraph/precise-code-intel-worker:272711_2024-05-06_5.3-d1983a8ca1b8'
     # build:
-      # dockerfile: /cmd/precise-code-intel-worker/Dockerfile
+      # dockerfile: cmd/precise-code-intel-worker/Dockerfile
       # context: '.'
     environment:
       - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
@@ -247,7 +247,7 @@ services:
     container_name: repo-updater
     # image: 'index.docker.io/sourcegraph/repo-updater:latest'
     build:
-      dockerfile: /cmd/repo-updater/Dockerfile
+      dockerfile: cmd/repo-updater/Dockerfile
       context: '.'
     environment:
       - 'SRC_LOG_LEVEL=info'
@@ -268,7 +268,7 @@ services:
     container_name: worker
     image: 'index.docker.io/sourcegraph/worker:272711_2024-05-06_5.3-d1983a8ca1b8'
     # build:
-      # dockerfile: /cmd/worker/Dockerfile
+      # dockerfile: cmd/worker/Dockerfile
       # context: '.'
     environment:
       - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
@@ -313,7 +313,7 @@ services:
     container_name: symbols-0
     image: 'index.docker.io/sourcegraph/symbols:272711_2024-05-06_5.3-d1983a8ca1b8'
     # build:
-      # dockerfile: /cmd/symbols/Dockerfile
+      # dockerfile: cmd/symbols/Dockerfile
       # context: '.'
     environment:
       - 'SRC_FRONTEND_INTERNAL=sourcegraph-frontend-internal:3090'
